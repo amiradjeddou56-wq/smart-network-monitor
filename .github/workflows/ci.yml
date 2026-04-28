@@ -1,25 +1,23 @@
-name: CI/CD Pipeline
+name: Network Monitor CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main ]
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Récupérer le code
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Installer Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.11
+          python-version: '3.9'
 
-      - name: Installer les dépendances
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Vérifier l’application Flask
-        run: python app.py
+      - name: Build Docker Image
+        run: docker build -t smart-network-monitor:latest .
