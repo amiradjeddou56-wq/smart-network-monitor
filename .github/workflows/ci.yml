@@ -1,23 +1,25 @@
-name: Network Monitor CI
+name: PFE Smart Network Deploy
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Deploy to Linux Server
+        uses: appleboy/ssh-action@master
         with:
-          python-version: '3.9'
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Build Docker Image
-        run: docker build -t smart-network-monitor:latest .
+          host: ${{ secrets.SERVER_IP }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            # تحديث الكود وتشغيل الحاوية تلقائياً
+            docker stop network-app || true
+            docker rm network-app || true
+            docker build -t smart-monitor .
+            docker run -d --name network-app -p 5000:5000 smart-monitor
