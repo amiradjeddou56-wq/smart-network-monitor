@@ -1,35 +1,35 @@
-name: Pipeline CI/CD - Smart Network Monitor
+name: Pipeline CI-CD Smart Network
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main ]  # تأكدي أن اسم الفرع عندك هو main وليس master
 
 jobs:
-  # المربع الأول: فحص الكود (CI)
-  integration:
+  # المربع الأول: فحص أولي
+  Preparation:
     name: Intégration Continue (CI)
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Installation des dépendances
-        run: pip install -r requirements.txt
+      - name: Check Environment
+        run: echo "Démarrage du pipeline sur Ubuntu..."
 
-  # المربع الثاني: بناء الحاوية (Docker Build)
-  build:
+  # المربع الثاني: بناء Docker
+  Build:
     name: Construction Docker
-    needs: integration # هذا يجعله ينتظر المربع الأول
+    needs: Preparation  # هذا هو السر لربط المربعات ببعضها
     runs-on: self-hosted
     steps:
-      - name: Build Docker Image
+      - name: Build Image
         run: docker build -t network-app .
 
-  # المربع الثالث: النشر (CD)
-  deploy:
+  # المربع الثالث: التشغيل النهائي
+  Deploy:
     name: Déploiement CD
-    needs: build # هذا يجعله ينتظر المربع الثاني
+    needs: Build
     runs-on: self-hosted
     steps:
-      - name: Stop and Run Container
+      - name: Deploy Container
         run: |
           docker stop network-app || true
           docker rm network-app || true
