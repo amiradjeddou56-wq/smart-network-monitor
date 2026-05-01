@@ -1,21 +1,36 @@
-name: PFE Smart Network Deploy
+name: Pipeline CI/CD - Smart Network Monitor
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  deploy:
-    # التغيير هنا: بدلاً من ubuntu-latest نكتب self-hosted
+  # المربع الأول: فحص الكود (CI)
+  integration:
+    name: Intégration Continue (CI)
     runs-on: self-hosted
-    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
+      - name: Installation des dépendances
+        run: pip install -r requirements.txt
 
-      - name: Build and Run Docker
+  # المربع الثاني: بناء الحاوية (Docker Build)
+  build:
+    name: Construction Docker
+    needs: integration # هذا يجعله ينتظر المربع الأول
+    runs-on: self-hosted
+    steps:
+      - name: Build Docker Image
+        run: docker build -t network-app .
+
+  # المربع الثالث: النشر (CD)
+  deploy:
+    name: Déploiement CD
+    needs: build # هذا يجعله ينتظر المربع الثاني
+    runs-on: self-hosted
+    steps:
+      - name: Stop and Run Container
         run: |
           docker stop network-app || true
           docker rm network-app || true
-          docker build -t smart-monitor .
-          docker run -d --name network-app -p 5000:5000 smart-monitor
+          docker run -d --name network-app -p 5000:5000 network-app
