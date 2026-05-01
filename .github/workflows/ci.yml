@@ -5,31 +5,31 @@ on:
     branches: [ main ]
 
 jobs:
-  # المربع الأول: فحص الكود (لن نستخدم pip هنا لتجنب الخطأ)
+  # المربع الأول: فحص (بدون أخطاء pip)
   Preparation:
     name: Intégration Continue (CI)
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
       - name: Validation du code
-        run: echo "Code récupéré avec succès. Prêt pour Docker."
+        run: echo "Le code est validé et prêt."
 
-  # المربع الثاني: بناء Docker (هنا يتم تثبيت المكتبات بداخل الحاوية)
+  # المربع الثاني: بناء Docker
   Build:
     name: Construction Docker
     needs: Preparation
     runs-on: self-hosted
     steps:
-      - name: Build Image
+      - name: Build Docker Image
         run: docker build -t network-app .
 
-  # المربع الثالث: النشر النهائي (الذي يظهر التطبيق في المتصفح)
+  # المربع الثالث: النشر
   Deploy:
     name: Déploiement CD
     needs: Build
     runs-on: self-hosted
     steps:
-      - name: Nettoyage et Lancement
+      - name: Deploy Container
         run: |
           docker stop network-app || true
           docker rm network-app || true
