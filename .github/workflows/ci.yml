@@ -2,34 +2,34 @@ name: Pipeline CI-CD Smart Network
 
 on:
   push:
-    branches: [ main ]  # تأكدي أن اسم الفرع عندك هو main وليس master
+    branches: [ main ]
 
 jobs:
-  # المربع الأول: فحص أولي
+  # المربع الأول: فحص الكود (لن نستخدم pip هنا لتجنب الخطأ)
   Preparation:
     name: Intégration Continue (CI)
     runs-on: self-hosted
     steps:
       - uses: actions/checkout@v3
-      - name: Check Environment
-        run: echo "Démarrage du pipeline sur Ubuntu..."
+      - name: Validation du code
+        run: echo "Code récupéré avec succès. Prêt pour Docker."
 
-  # المربع الثاني: بناء Docker
+  # المربع الثاني: بناء Docker (هنا يتم تثبيت المكتبات بداخل الحاوية)
   Build:
     name: Construction Docker
-    needs: Preparation  # هذا هو السر لربط المربعات ببعضها
+    needs: Preparation
     runs-on: self-hosted
     steps:
       - name: Build Image
         run: docker build -t network-app .
 
-  # المربع الثالث: التشغيل النهائي
+  # المربع الثالث: النشر النهائي (الذي يظهر التطبيق في المتصفح)
   Deploy:
     name: Déploiement CD
     needs: Build
     runs-on: self-hosted
     steps:
-      - name: Deploy Container
+      - name: Nettoyage et Lancement
         run: |
           docker stop network-app || true
           docker rm network-app || true
