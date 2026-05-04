@@ -5,7 +5,7 @@ on:
     branches: [ main ]
 
 jobs:
-  # المربع الأول: فحص (سنتجاوز pip هنا لتجنب الخطأ)
+  # المربع الأول: فحص
   Preparation:
     name: Intégration Continue (CI)
     runs-on: self-hosted
@@ -23,9 +23,9 @@ jobs:
       - name: Build Docker Image
         run: docker build -t network-app .
 
-  # المربع الثالث: النشر
+  # المربع الثالث: النشر المحلي
   Deploy:
-    name: Déploiement CD
+    name: Déploiement CD (Local)
     needs: Build
     runs-on: self-hosted
     steps:
@@ -34,3 +34,13 @@ jobs:
           docker stop network-app || true
           docker rm network-app || true
           docker run -d --name network-app -p 5000:5000 network-app
+
+  # المربع الرابع: النشر على Render
+  Deploy_Render:
+    name: Déploiement sur Render
+    needs: Deploy
+    runs-on: self-hosted
+    steps:
+      - name: Trigger Render Deploy
+        run: |
+          curl -X POST "https://api.render.com/deploy/${{ secrets.RENDER_SERVICE_ID }}?key=${{ secrets.RENDER_API_KEY }}"
